@@ -1,7 +1,7 @@
 from nltk.tag import StanfordPOSTagger
 from nltk.internals import find_jars_within_path
 
-_stanford_postagger = StanfordPOSTagger('stanford-postagger/models/english-bidirectional-distsim.tagger', path_to_jar='stanford-postagger/stanford-postagger.jar')
+_stanford_postagger = StanfordPOSTagger('stanford-postagger/models/english-bidirectional-distsim.tagger', path_to_jar='stanford-postagger/stanford-postagger.jar', java_options='-mx2g')
 _stanford_postagger._stanford_jar = ':'.join(find_jars_within_path('stanford-postagger'))
 
 def stanford_postagger():
