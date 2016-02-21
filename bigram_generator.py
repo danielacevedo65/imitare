@@ -9,9 +9,7 @@ class bigram_generator:
 
     def _learn_models(self):
         self._vocab_cfd = nltk.ConditionalFreqDist(nltk.bigrams(self._yield_words())) 
-        self._vocab_cpd = nltk.ConditionalProbDist(self._vocab_cfd, nltk.ELEProbDist) 
         self._grammar_cfd = nltk.ConditionalFreqDist(nltk.bigrams(self._yield_tags()))
-        self._grammar_cpd = nltk.ConditionalProbDist(self._grammar_cfd, nltk.ELEProbDist)
 
         self._tag_to_freqdist = defaultdict(nltk.FreqDist)
         for (word, tag) in self._tagged_words:
@@ -27,7 +25,7 @@ class bigram_generator:
             generated_tags.append(tag)
             if len(self._grammar_cfd[tag]) == 0:
                 break
-            tag = self._grammar_cpd[tag].generate()
+            tag = nltk.ELEProbDist(self._grammar_cfd[tag]).generate()
 
         generated_words = []
         
@@ -70,5 +68,8 @@ if __name__ == '__main__':
         text = input_file.read()
 
     model = bigram_generator(stanford_postagger().tag(stanford_tokenizer().tokenize(text)))
-    for line in sys.stdin:
-        print(model.generate(100))
+
+    while True:
+        num_words = input("Enter the length in words to generate: ")
+        if num_words.isdigit():
+            print(model.generate(int(num_words)))
