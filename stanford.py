@@ -6,13 +6,14 @@ import tempfile
 
 class StanfordTagger:
 
-    def __init__(self, model='stanford/models/english-bidirectional-distsim.tagger', libpath='stanford/'):
+    def __init__(self, model='stanford/models/english-bidirectional-distsim.tagger', libpath='stanford/', verbose=False):
         self._model = model
+        self._verbose = verbose
         self._libs = find_jars_within_path(libpath)
         self._xml_regex = re.compile(
             r'  <word wid="[0-9]*" pos="([^"]*)" lemma="([^"]*)">(.*?)</word>')
 
-        config_java(verbose=False)
+        config_java(verbose=verbose)
 
     def tag(self, text, options=['-mx2g']):
         command = ['edu.stanford.nlp.tagger.maxent.MaxentTagger']
@@ -27,8 +28,9 @@ class StanfordTagger:
 
             command.extend(['-textFile', text_file.name])
 
+            stderr = subprocess.DEVNULL if not self._verbose else None
             stdout, _ = java(command, classpath=self._libs,
-                             stdout=subprocess.PIPE)
+                             stderr=stderr, stdout=subprocess.PIPE)
             output = stdout.decode('utf-8')
 
         tagged = []

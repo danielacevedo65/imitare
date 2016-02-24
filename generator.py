@@ -56,15 +56,15 @@ if __name__ == '__main__':
     from stanford import StanfordTagger
 
     if len(sys.argv) != 3:
-        print("usage: python", sys.argv[0], "input_file n")
-        print("    input_file: learn a model from this text file")
-        print("    n: n for the ngram model")
+        print("usage: python", sys.argv[0], "text n")
+        print("    text: file to train model with")
+        print("    n: length of ngrams")
         sys.exit(1)
 
     with open(sys.argv[1]) as input_file:
         text = input_file.read()
 
-    tagged = StanfordTagger().tag(text)
+    tagged = StanfordTagger(verbose=True).tag(text)
     model = LVGNgramGenerator(tagged, int(sys.argv[2]))
 
     while True:
