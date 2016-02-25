@@ -13,6 +13,7 @@ class LVGNgramGenerator:
         self._learn_models()
 
     def _learn_models(self):
+        self._words_ngram = NgramModel(self._yield_words(), self._n)
         self._lemmas_ngram = NgramModel(self._yield_lemmas(), self._n)
         self._tags_ngram = NgramModel(self._yield_tags(), self._n)
 
@@ -34,8 +35,13 @@ class LVGNgramGenerator:
 
         generated_words = []
         for (tag, lemma) in zip(generated_tags, generated_lemmas):
-            generated_words.append(MLEProbDist(
-                self._tag_lemma_words[(tag, lemma)]).generate())
+            choices = self._words_ngram.backoff_search(generated_words, lambda word: word in self._tag_lemma_words[(tag, lemma)])
+            if choices is not None:
+                print("lucky to get choices this time", repr(choices))
+                generated_words.append(MLEProbDist(choices).generate())
+            else:
+                print("none of these fit at any point", repr(self._tag_lemma_words[(tag, lemma)]))
+                generated_words.append(MLEProbDist(self._tag_lemma_words[(tag, lemma)]).generate())
 
         return generated_words
 

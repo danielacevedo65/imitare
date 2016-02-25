@@ -20,6 +20,17 @@ class NgramModel:
             self._unigram_fd = FreqDist(words)
             self._unigram_pd = MLEProbDist(self._unigram_fd)
 
+    def backoff_search(self, context, predicate):
+        context = tuple(context)[1 - self._n:]
+        if context in self:
+            choices = FreqDist({word: freq for (word, freq) in self._cfd[context].most_common() if predicate(word)})
+            if len(choices) > 0:
+                return choices
+        if self._n > 2:
+            return self._backoff.backoff_search(context, predicate)
+        else:
+            return None
+
     def choose_word(self, context, predicate=None):
         return self.generate(1, context, predicate)[-1]
 
@@ -43,13 +54,9 @@ class NgramModel:
 
     def _generate_one_predicated(self, context, predicate):
         context = tuple(context)[1 - self._n:]
-        if context in self:
-            choices = FreqDist({word: freq for (word, freq) in self._cfd[
-                               context].most_common() if predicate(word)})
-            if len(choices) > 0:
-                return MLEProbDist(choices).generate()
-        if self._n > 2:
-            return self._backoff._generate_one_predicated(context, predicate)
+        choices = self.backoff_search(context, predicate)
+        if choices is not None:
+            return MLEProbDist(choices).generate()
         else:
             # Predicated generate() does not produce a random unigram, as it is
             # slow to filter the entire unigram list repeatedly. Instead, it
