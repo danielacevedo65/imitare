@@ -10,20 +10,17 @@ class NgramModel:
         if not isinstance(words, list):
             words = list(words)
 
-        self._cfd = ConditionalFreqDist(
-            (ngram[:-1], ngram[-1]) for ngram in ngrams(words, n))
-        self._cpd = ConditionalProbDist(self._cfd, MLEProbDist)
+        self._cpd = ConditionalProbDist(ConditionalFreqDist((ngram[:-1], ngram[-1]) for ngram in ngrams(words, n)), MLEProbDist)
 
         if self._n > 2:
             self._backoff = NgramModel(words, n - 1)
         else:
-            self._unigram_fd = FreqDist(words)
-            self._unigram_pd = MLEProbDist(self._unigram_fd)
+            self._unigram_pd = MLEProbDist(FreqDist(words))
 
     def backoff_search(self, context, predicate):
         context = tuple(context)[1 - self._n:]
         if context in self:
-            choices = FreqDist({word: freq for (word, freq) in self._cfd[context].most_common() if predicate(word)})
+            choices = FreqDist({word: freq for (word, freq) in self._cpd[context].freqdist().most_common() if predicate(word)})
             if len(choices) > 0:
                 return choices
         if self._n > 2:
@@ -66,9 +63,9 @@ class NgramModel:
     def __contains__(self, item):
         if not isinstance(item, tuple):
             item = (item,)
-        return item in self._cfd
+        return item in self._cpd
 
     def __getitem__(self, item):
         if not isinstance(item, tuple):
             item = (item,)
-        return self._cfd[item]
+        return self._cpd[item]

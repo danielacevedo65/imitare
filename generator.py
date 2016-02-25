@@ -35,13 +35,13 @@ class LVGNgramGenerator:
 
         generated_words = []
         for (tag, lemma) in zip(generated_tags, generated_lemmas):
-            choices = self._words_ngram.backoff_search(generated_words, lambda word: word in self._tag_lemma_words[(tag, lemma)])
+            choices = self._words_ngram.backoff_search(
+                generated_words, lambda word: word in self._tag_lemma_words[(tag, lemma)])
             if choices is not None:
-                print("lucky to get choices this time", repr(choices))
                 generated_words.append(MLEProbDist(choices).generate())
             else:
-                print("none of these fit at any point", repr(self._tag_lemma_words[(tag, lemma)]))
-                generated_words.append(MLEProbDist(self._tag_lemma_words[(tag, lemma)]).generate())
+                generated_words.append(MLEProbDist(
+                    self._tag_lemma_words[(tag, lemma)]).generate())
 
         return generated_words
 
@@ -56,27 +56,3 @@ class LVGNgramGenerator:
     def _yield_words(self):
         for (word, _, _) in self._tagged:
             yield word
-
-if __name__ == '__main__':
-    import sys
-    from stanford import StanfordTagger
-
-    if len(sys.argv) != 3:
-        print("usage: python", sys.argv[0], "text n")
-        print("    text: file to train model with")
-        print("    n: length of ngrams")
-        sys.exit(1)
-
-    with open(sys.argv[1]) as input_file:
-        text = input_file.read()
-
-    tagged = StanfordTagger(verbose=True).tag(text)
-    model = LVGNgramGenerator(tagged, int(sys.argv[2]))
-
-    while True:
-        num_words = input(
-            'Enter the length in words to generate (or "quit" to exit): ')
-        if num_words.isdigit():
-            print(' '.join(model.generate(int(num_words))))
-        elif num_words == 'quit':
-            break
