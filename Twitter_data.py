@@ -51,25 +51,37 @@ class TwitterData:
             try:
                 userData.write(str(f) + " " + str(info[f]) + "\n")
             except:
-                pass
+                pass        
         
-        tweets = self.twitterAuth.get_user_timeline(screen_name=self.user, count=200, exclude_replies=1, include_rts=0)
-        for i in tweets:
-            try:
-                userTweets.write(i['text'] + "\n")
-            except:
-                pass
-        
-        '''
-        ### TEST PRINT ###
-        print("\n" + self.user + "'s Data\n")
-        for i in info:
-            print('    ' + str(i) + ' -> ' + str(info[i]))
-        print("\n" + self.user + "'s Latest Tweets\n")
-        for i in range(len(tweets)):
-            print(str(i+1) + ": " + tweets[i]['text'] + '\n')
-        ### END TEST ###
-        '''
+        maxTweet = self.twitterAuth.get_user_timeline(screen_name=self.user, count=1)[0]['id']
+        for h in range(20): 
+            tweets = self.twitterAuth.get_user_timeline(screen_name=self.user, count=200, exclude_replies=1, include_rts=0, max_id=maxTweet)
+            for i in tweets:
+                if h > 0 and i['id'] == maxTweet:
+                    pass
+                else:
+                    temp = []
+                    for j in str(i['text']).split():
+                        if j[0:4] != "http":
+                            temp.append(j)
+                    temp = ' '.join(temp)
+
+                    try:
+                        userTweets.write(temp + "\n")
+                    except:
+                        pass
+                    maxTweet = i['id']
+            
+            '''
+            ### TEST PRINT ###
+            print("\n" + self.user + "'s Data\n")
+            for i in info:
+                print('    ' + str(i) + ' -> ' + str(info[i]))
+            print("\n" + self.user + "'s Latest Tweets\n")
+            for i in range(len(tweets)):
+                print(str(i+1) + ": " + tweets[i]['text'] + '\n')
+            ### END TEST ###
+            '''
     
     def execute(self):
         user_data = "%s_data.txt" % (self.user)
@@ -84,3 +96,6 @@ class TwitterData:
         userTweets.close()
         
         return os.path.abspath(user_tweets)
+        
+if __name__ == '__main__':
+    TwitterData().execute()
