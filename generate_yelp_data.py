@@ -18,12 +18,14 @@ Relevant keys: business_id, user_id, stars, text, date
 """
 
 import json
+import urllib.request as ur
 import matplotlib.pyplot as plt
 from nltk import FreqDist
 
 class Yelp_Data:
 
-    YELP_FILE = "yelp_data/yelp_academic_dataset_review.json"
+    LOCAL_YELP_FILE = "yelp_data/yelp_academic_dataset_review.json"
+    YELP_FILE_LINK = "http://www.ics.uci.edu/~changsm1/data/yelp_academic_dataset_review.json"
 
     def __init__(self, n_reviews=100, min_review_length=50, criteria_key=None, criteria_value=None):
         self.n_reviews = n_reviews                      # number of reviews to search through for criteria
@@ -38,14 +40,16 @@ class Yelp_Data:
 
     def fetch_reviews(self):
         """Fetches JSON review with all info"""
-        with open(self.YELP_FILE) as data_file:
-            #while len(self.reviews) < self.n_reviews:      # search through all reviews to get right number (may error out)
-            for i in range(self.n_reviews):                 # go through set number of reviews
-                review_json = json.loads(data_file.readline())
-                if self.criteria_key != None:
-                    if review_json[self.criteria_key] != self.criteria_value:
-                        continue
-                self.reviews.append(review_json)
+        data_file = ur.urlopen(self.YELP_FILE_LINK)
+        #with open(self.YELP_FILE) as data_file:                # USED LOCALLY
+            #while len(self.reviews) < self.n_reviews:          # search through all reviews to get right number (may error out)
+        for i in range(self.n_reviews):                         # go through set number of reviews
+            #review_json = json.loads(data_file.readline())     # USED LOCALLY
+            review_json = json.loads(data_file.readline().decode("utf-8"))
+            if self.criteria_key != None:
+                if review_json[self.criteria_key] != self.criteria_value:
+                    continue
+            self.reviews.append(review_json)
 
     def fetch_review_text(self):
         """Retrieves text of review"""
