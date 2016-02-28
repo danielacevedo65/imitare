@@ -1,26 +1,53 @@
 from nltk.probability import ConditionalFreqDist, MLEProbDist
 from ngram import NgramModel
 
+class WordIdDictionary:
+    """ Mapping for word <-> id transformation """
+
+    def __init__(self, words=[]):
+        self._count = 0
+        self._to_id = dict()
+        self._to_word = dict()
+
+        self.add_words(words)
+
+    def add_words_transform(self, words):
+        self.add_words(words)
+        return self.transform_words(words)
+
+    def add_words(self, words):
+        for word in words:
+            self._possibly_add_word(word)
+
+    def _possibly_add_word(self, word):
+        if not word in self._to_id:
+            self._to_id[word] = self._count
+            self._to_word[self._count] = word
+            self._count += 1
+
+    def transform_words(self, words):
+        return map(lambda word: self._to_id[word], words)
+
+    def transform_ids(self, ids):
+        return map(lambda ids: self._to_word[ids], ids)
 
 class LVGNgramGenerator:
     """ Lemmatized vocubulary and grammar ngram-based generator """
 
-    def __init__(self, tagged, n):
+    def __init__(self, tuples, n):
         self._n = n
-        if not isinstance(tagged, list):
-            tagged = list(tagged)
-        self._tagged = tagged
-        self._learn_models()
+        self._make_models(tuples)
 
-    def _learn_models(self):
-        self._words_ngram = NgramModel(self._yield_words(), self._n)
-        self._lemmas_ngram = NgramModel(self._yield_lemmas(), self._n)
-        self._tags_ngram = NgramModel(self._yield_tags(), self._n)
+    def _make_models(self, tuples):
+        self._word_ids = WordIdDictionary()
 
-        self._tag_lemmas = ConditionalFreqDist(
-            (tag, lemma) for (_, lemma, tag) in self._tagged)
-        self._tag_lemma_words = ConditionalFreqDist(
-            ((tag, lemma), word) for (word, lemma, tag) in self._tagged)
+        words, lemmas, tags = tuple(map(lambda tokens: list(self._word_ids.add_words_transform(tokens)), zip(*tuples)))
+        self._words_ngram = NgramModel(words, self._n)
+        self._lemmas_ngram = NgramModel(lemmas, self._n)
+        self._tags_ngram = NgramModel(tags, self._n)
+
+        self._tag_lemmas = ConditionalFreqDist(zip(tags, lemmas))
+        self._tag_lemma_words = ConditionalFreqDist(zip(zip(tags, lemmas), words))
 
     def generate(self, n):
         generated_tags = self._tags_ngram.generate(n)
@@ -43,16 +70,4 @@ class LVGNgramGenerator:
                 generated_words.append(MLEProbDist(
                     self._tag_lemma_words[(tag, lemma)]).generate())
 
-        return generated_words
-
-    def _yield_tags(self):
-        for (_, _, tag) in self._tagged:
-            yield tag
-
-    def _yield_lemmas(self):
-        for (_, lemma, _) in self._tagged:
-            yield lemma
-
-    def _yield_words(self):
-        for (word, _, _) in self._tagged:
-            yield word
+        return list(self._word_ids.transform_ids(generated_words))
