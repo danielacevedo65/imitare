@@ -53,7 +53,7 @@ class LVGNgramGenerator:
             self._word_ids.add_words_transform(tokens)), zip(*tuples)))
         self._words_ngram = NgramModel(words, self._n)
         self._lemmas_ngram = NgramModel(lemmas, self._n)
-        self._tags_ngram = NgramModel(tags, self._n)
+        self._tags_ngram = NgramModel(tags, self._n * 2)
 
         self._tag_lemmas = ConditionalFreqDist(zip(tags, lemmas))
         self._tag_lemma_words = ConditionalFreqDist(
