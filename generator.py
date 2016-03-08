@@ -1,4 +1,4 @@
-from nltk.probability import ConditionalFreqDist, MLEProbDist
+from nltk.probability import FreqDist, ConditionalFreqDist, MLEProbDist
 from ngram import NgramModel
 
 
@@ -28,7 +28,7 @@ class WordIdDictionary:
 
     def transform_word(self, word):
         return self._to_id[word]
-    
+
     def transform_id(self, id):
         return self._to_word[id]
 
@@ -53,7 +53,7 @@ class LVGNgramGenerator:
             self._word_ids.add_words_transform(tokens)), zip(*tuples)))
         self._words_ngram = NgramModel(words, self._n)
         self._lemmas_ngram = NgramModel(lemmas, self._n)
-        self._tags_ngram = NgramModel(tags, self._n * 2)
+        self._tags_ngram = NgramModel(tags, 2 * self._n)
 
         self._tag_lemmas = ConditionalFreqDist(zip(tags, lemmas))
         self._tag_lemma_words = ConditionalFreqDist(
@@ -68,7 +68,8 @@ class LVGNgramGenerator:
                 generated_lemmas, backoff_limit=2, predicate=lambda lemma: lemma in self._tag_lemmas[tag])
             if choice is None:
                 choice = MLEProbDist(self._tag_lemmas[tag]).generate()
-                print("forced to generate lemma", self._word_ids.transform_id(choice))
+                print("forced to generate lemma",
+                      self._word_ids.transform_id(choice))
             generated_lemmas.append(choice)
 
         generated_words = []
@@ -77,7 +78,56 @@ class LVGNgramGenerator:
                 generated_words, backoff_limit=2, predicate=lambda word: word in self._tag_lemma_words[(tag, lemma)])
             if choices is None:
                 choices = self._tag_lemma_words[(tag, lemma)]
-                print("forced to generate words", repr({self._word_ids.transform_id(choice): freq for choice,freq in choices.items()}))
+                print("forced to generate words", repr({self._word_ids.transform_id(
+                    choice): freq for choice, freq in choices.items()}))
+            generated_words.append(MLEProbDist(choices).generate())
+
+        return list(self._word_ids.transform_ids(generated_words))
+
+    def generate2(self, n):
+        generated_tags = []
+        generated_lemmas = []
+        generated_words = []
+
+        for i in range(n):
+            tag_choice = None
+
+            size = 2 * self._n
+            while size > 2:
+                tag_choices = self._tags_ngram.backoff_search(
+                    generated_tags, backoff_limit=1, predicate=lambda tag: True, start_n=size)
+                tag_to_lemma = {}
+                for tag, _ in tag_choices.items():
+                    lemma = self._lemmas_ngram.choose_word(
+                        generated_lemmas, backoff_limit=2, predicate=lambda lemma: lemma in self._tag_lemmas[tag])
+                    if lemma is not None:
+                        tag_to_lemma[tag] = lemma
+                if len(tag_to_lemma) > 0:
+                    tag_probdist = MLEProbDist(FreqDist(
+                        {tag: freq for tag, freq in tag_choices.items() if tag in tag_to_lemma}))
+                    tag_choice = tag_probdist.generate()
+                    lemma_choice = tag_to_lemma[tag_choice]
+                    break
+                else:
+                    size -= 1
+
+            if tag_choice is None:
+                tag_choice = MLEProbDist(tag_choices).generate()
+                lemma_choice = MLEProbDist(
+                    self._tag_lemmas[tag_choice]).generate()
+                print("forced to generate lemma",
+                      self._word_ids.transform_id(lemma_choice))
+
+            generated_tags.append(tag_choice)
+            generated_lemmas.append(lemma_choice)
+
+        for (tag, lemma) in zip(generated_tags, generated_lemmas):
+            choices = self._words_ngram.backoff_search(
+                generated_words, backoff_limit=2, predicate=lambda word: word in self._tag_lemma_words[(tag, lemma)])
+            if choices is None:
+                choices = self._tag_lemma_words[(tag, lemma)]
+                print("forced to generate words", repr({self._word_ids.transform_id(
+                    choice): freq for choice, freq in choices.items()}))
             generated_words.append(MLEProbDist(choices).generate())
 
         return list(self._word_ids.transform_ids(generated_words))

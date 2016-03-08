@@ -5,12 +5,19 @@ import pickle
 
 
 def _write_var_uint(uint):
-    output = bytearray()
+    bytes = bytearray()
     while uint > 127:
-        output.append((uint & 127) | 128)
+        bytes.append((uint & 127) | 128)
         uint >>= 7
-    output.append(uint & 127)
-    return output
+    bytes.append(uint & 127)
+    return bytes
+
+
+def _write_var_uint_to(uint, bytes):
+    while uint > 127:
+        bytes.append((uint & 127) | 128)
+        uint >>= 7
+    bytes.append(uint & 127)
 
 
 def _read_var_uint(bytes):
@@ -23,10 +30,10 @@ def _read_var_uint(bytes):
 
 
 def _compact_write_ints(iterable):
-    output = bytearray()
+    bytes = bytearray()
     for i in iterable:
-        output += _write_var_uint(i)
-    return output
+        _write_var_uint_to(i, bytes)
+    return bytes
 
 
 def _compact_read_ints(bytes):
@@ -46,11 +53,12 @@ def _compact_inttuple_read(bytes):
     return tuple(_compact_read_ints(bytes))
 
 
-def _compact_intdict_write(d):
-    ints = []
-    for k, v in d.items():
-        ints.extend((k, v))
-    return _compact_write_ints(ints)
+def _compact_FreqDist_write(d):
+    def yield_kvs(d):
+        for k, v in d.items():
+            yield k
+            yield v
+    return _compact_write_ints(yield_kvs(d))
 
 
 def _compact_intdict_read(bytes):
@@ -59,8 +67,8 @@ def _compact_intdict_read(bytes):
 
 sqlite3.register_adapter(tuple, _compact_inttuple_write)
 sqlite3.register_converter("tuple", _compact_inttuple_read)
-sqlite3.register_adapter(dict, _compact_intdict_write)
-sqlite3.register_converter("dict", _compact_intdict_read)
+sqlite3.register_adapter(FreqDist, _compact_FreqDist_write)
+sqlite3.register_converter("FreqDist", _compact_intdict_read)
 
 ##def _sqlite_register_pickle(typecls, typename):
 ##    sqlite3.register_adapter(typecls, pickle.dumps)
@@ -78,7 +86,7 @@ class SqliteConditionalFreqDist:
         conn = sqlite3.connect(database, detect_types=sqlite3.PARSE_DECLTYPES)
         self._sql = conn.cursor()
         self._sql.execute(
-            'create table cfd(k tuple unique primary key, v dict)')
+            'create table cfd(k tuple unique primary key, v FreqDist)')
 
         self.update(cond_samples)
 
@@ -98,14 +106,14 @@ class SqliteConditionalFreqDist:
             cfd[cond] += olddist
 
         self._sql.executemany('insert or replace into cfd(k, v) values (?, ?)', ((
-            cond, dict(freqdist)) for cond, freqdist in cfd.items()))
+            cond, freqdist) for cond, freqdist in cfd.items()))
 
     def commit_replace(self):
         cfd = self._journal
         self._journal = ConditionalFreqDist()
 
         self._sql.executemany('insert or replace into cfd(k, v) values (?, ?)', ((
-            cond, dict(freqdist)) for cond, freqdist in cfd.items()))
+            cond, freqdist) for cond, freqdist in cfd.items()))
 
     def __getitem__(self, key):
         self._sql.execute('select v from cfd where k = (?)', (key,))

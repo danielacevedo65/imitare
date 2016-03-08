@@ -22,8 +22,12 @@ class NgramModel:
             cfd.commit_replace()
         self._cfd = cfd
 
-    def backoff_search(self, context, backoff_limit, predicate):
-        context = tuple(context)[1 - self._n:]
+    def backoff_search(self, context, backoff_limit, predicate, start_n=None):
+        if start_n is not None:
+            n = start_n
+        else:
+            n = self._n
+        context = tuple(context)[1 - n:]
         while True:
             while not context in self and len(context) >= backoff_limit:
                 context = context[1:]

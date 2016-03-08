@@ -3,7 +3,6 @@ import re
 import subprocess
 import tempfile
 
-
 class StanfordTagger:
 
     def __init__(self, model='stanford/models/english-bidirectional-distsim.tagger', libpath='stanford/', verbose=False):
@@ -40,3 +39,23 @@ class StanfordTagger:
                 tagged.append((match.group(3), match.group(2), match.group(1)))
 
         return tagged
+
+class StanfordDetokenizer:
+
+    def __init__(self, libpath='stanford/', verbose=False):
+        self._verbose = verbose
+        self._libs = find_jars_within_path(libpath)
+
+        config_java(verbose=verbose)
+
+    def detokenize(self, text, options=['-mx2g']):
+        command = ['edu.stanford.nlp.process.PTBTokenizer', '-untok']
+        command.extend(options)
+
+        stderr = subprocess.DEVNULL if not self._verbose else None
+        jproc = java(command, classpath=self._libs, blocking=False,
+                         stderr=stderr, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        stdout, _ = jproc.communicate(text.encode('utf-8'))
+        output = stdout.decode('utf-8')
+
+        return output

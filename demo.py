@@ -1,6 +1,6 @@
 import argparse
 import csv
-from stanford import StanfordTagger
+from stanford import StanfordTagger, StanfordDetokenizer
 from generator import LVGNgramGenerator
 
 def main(raw_file, tagged_file, save_file, n):
@@ -17,11 +17,12 @@ def main(raw_file, tagged_file, save_file, n):
         tagged = [tuple(row) for row in tagged]
         tagged_file.close()
 
+    detok = StanfordDetokenizer()
     model = LVGNgramGenerator(tagged, n)
     while True:
         num_words = input('Enter the length in words to generate (or "q" to exit): ')
         if num_words.isdigit():
-            print(' '.join(model.generate(int(num_words))))
+            print(detok.detokenize(' '.join(model.generate2(int(num_words)))))
         elif num_words == 'q':
             break
 
