@@ -1,5 +1,6 @@
 from nltk.probability import FreqDist, ConditionalFreqDist, MLEProbDist
 from ngram import NgramModel
+import random
 
 
 class WordIdDictionary:
@@ -51,6 +52,7 @@ class LVGNgramGenerator:
 
         words, lemmas, tags = tuple(map(lambda tokens: list(
             self._word_ids.add_words_transform(tokens)), zip(*tuples)))
+        self._tags = tags
         self._words_ngram = NgramModel(words, self._n)
         self._lemmas_ngram = NgramModel(lemmas, self._n)
         self._tags_ngram = NgramModel(tags, 2 * self._n)
@@ -60,7 +62,9 @@ class LVGNgramGenerator:
             zip(zip(tags, lemmas), words))
 
     def generate(self, n):
-        generated_tags = self._tags_ngram.generate(n)
+        start = random.randint(n, len(self._tags) - n)
+        generated_tags = self._tags[start : start + n]
+        #generated_tags = self._tags_ngram.generate(n)
 
         generated_lemmas = []
         for tag in generated_tags:
@@ -95,21 +99,21 @@ class LVGNgramGenerator:
             size = 2 * self._n
             while size > 2:
                 tag_choices = self._tags_ngram.backoff_search(
-                    generated_tags, backoff_limit=1, predicate=lambda tag: True, start_n=size)
+                    generated_tags, backoff_limit=2, predicate=lambda tag: True, start_n=size)
                 tag_to_lemma = {}
-                for tag, _ in tag_choices.items():
-                    lemma = self._lemmas_ngram.choose_word(
-                        generated_lemmas, backoff_limit=2, predicate=lambda lemma: lemma in self._tag_lemmas[tag])
-                    if lemma is not None:
-                        tag_to_lemma[tag] = lemma
-                if len(tag_to_lemma) > 0:
-                    tag_probdist = MLEProbDist(FreqDist(
-                        {tag: freq for tag, freq in tag_choices.items() if tag in tag_to_lemma}))
-                    tag_choice = tag_probdist.generate()
-                    lemma_choice = tag_to_lemma[tag_choice]
-                    break
-                else:
-                    size -= 1
+                if tag_choices is not None:
+                    for tag, _ in tag_choices.items():
+                        lemma = self._lemmas_ngram.choose_word(
+                            generated_lemmas, backoff_limit=2, predicate=lambda lemma: lemma in self._tag_lemmas[tag])
+                        if lemma is not None:
+                            tag_to_lemma[tag] = lemma
+                    if len(tag_to_lemma) > 1:
+                        tag_probdist = MLEProbDist(FreqDist(
+                            {tag: freq for tag, freq in tag_choices.items() if tag in tag_to_lemma}))
+                        tag_choice = tag_probdist.generate()
+                        lemma_choice = tag_to_lemma[tag_choice]
+                        break
+                size -= 1
 
             if tag_choice is None:
                 tag_choice = MLEProbDist(tag_choices).generate()
