@@ -19,10 +19,13 @@ def main(raw_file, tagged_file, save_file, n):
 
     detok = StanfordDetokenizer()
     model = LVGNgramGenerator(tagged, n)
+    methods = {'b': model.generate_without_pos, 'n': model.generate, 't': model.generate_alternative}
     while True:
         num_words = input('Enter the length in words to generate (or "q" to exit): ')
         if num_words.isdigit():
-            print(detok.detokenize(' '.join(model.generate2(int(num_words)))))
+            method = input('Enter a generation method {b: baseline, n: normal, t: tuned}: ')
+            if method in methods:
+                print(detok.detokenize(' '.join(methods[method](int(num_words)))))
         elif num_words == 'q':
             break
 

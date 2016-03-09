@@ -61,6 +61,10 @@ class LVGNgramGenerator:
         self._tag_lemma_words = ConditionalFreqDist(
             zip(zip(tags, lemmas), words))
 
+    def generate_without_pos(self, n):
+        generated_words = self._words_ngram.generate(n)
+        return list(self._word_ids.transform_ids(generated_words))
+
     def generate(self, n):
         start = random.randint(n, len(self._tags) - n)
         generated_tags = self._tags[start : start + n]
@@ -88,7 +92,7 @@ class LVGNgramGenerator:
 
         return list(self._word_ids.transform_ids(generated_words))
 
-    def generate2(self, n):
+    def generate_alternative(self, n):
         generated_tags = []
         generated_lemmas = []
         generated_words = []
