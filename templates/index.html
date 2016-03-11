@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>Imitare</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/loading.css">
+    <script type="text/javascript">
+        var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+
+
+</head>
+
+<body class="body" style="background-color:#f5f5f5">
+    <div class="jumbotron">
+        <div class="container">
+            <h1>Imitare</h1>
+            <p>Welcome to Imitare!</p>
+            <p>The Twitter, Yelp, and Project Gutenberg Imitation System</p>
+        </div>
+    </div>
+    <div class="container">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <h2>Twitter</h2>
+                <p>
+                    Enter in the Twitter username that you would like to use. The user's account must be public. An example is: barackobama. Press the button to begin imitating!
+                </p>
+                <br>
+                <form id="Twitter">
+                  Enter a Twitter username:
+                  <input id="twitterUser" type="text" name="username"><br><br>
+                </form> 
+                <form id="words">
+                  Enter an amount of tweets to generate:
+                  <input id="amount" type="text" name="amountW"><br><br>
+                </form> 
+                <form id="method">
+                  Enter a method (n: normal, b: baseline, t: tuned):
+                  <input id="which" type="text" name="whichM"><br><br>
+                </form> 
+                <p>
+                    <button onclick="getTwitter()">Generate Using Twitter</button>
+                </p>
+                <p id="display"></p>
+            </div>
+
+            <div class="col-md-4">
+                <h2>Yelp</h2>
+                <p>
+                    Sample Yelp data is available. Please enter how many generated yelp reviews and the method you would like to use. 
+                </p>
+                <br>
+                <form id="Ywords">
+                  Enter an amount of Yelp reviews to generate:
+                  <input id="Yamount" type="text" name="YamountW"><br><br>
+                </form> 
+                <form id="Ymethod">
+                  Enter a method (n: normal, b: baseline, t: tuned):
+                  <input id="Ywhich" type="text" name="YwhichM"><br><br>
+                </form> 
+                <p>
+                    <button onclick="getYelp()">Generate Using Yelp</button>
+                </p>
+                <p id="Ydisplay"></p>
+            </div>
+
+            <div class="col-md-4">
+                <h2>Project Gutenberg</h2>
+                <p>
+                     Sample text from Harry Potter and the Sorcerer's Stone is available. Please enter how many sentences to generate and the method you would like to use.
+                </p>
+                <br>
+                <form id="Gwords">
+                  Enter an amount of sentences to generate:
+                  <input id="Gamount" type="text" name="GamountW"><br><br>
+                </form> 
+                <form id="Gmethod">
+                  Enter a method (n: normal, b: baseline, t: tuned):
+                  <input id="Gwhich" type="text" name="GwhichM"><br><br>
+                </form> 
+                <p>
+                    <button onclick="getGutenberg()">Generate Using Project Gutenberg</button>
+                </p>
+                <p id="Gdisplay"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadGIF">
+        
+    </div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/twitter.js') }}"></script>
+<script src="static/js/jquery.js"></script>
+
+</body>
+
+</html>
