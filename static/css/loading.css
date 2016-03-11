@@ -1,0 +1,11 @@
+#loadGIF {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    z-index: 1000;
+    display: none;
+    background: url("/static/loading.gif") no-repeat;
+    cursor: wait;
+}
