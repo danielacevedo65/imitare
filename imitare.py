@@ -59,8 +59,7 @@ class Imitare:
         print("\tExisting Data Set: Use a tagged file to generate text (faster).")
         print("\t\t- Twitter: Barack Obama, Bernie Sanders, CNN, Donald Trump, Jimmy Fallon, Kanye West, NASA")
         print("\t\t- Project Gutenberg: Harry Potter and the Sorceror's Stone")
-        print("\t\t- Yelp: 1000 Reviews (Length: 50 words)")
-        print()
+        print("\t\t- Yelp: 1000 Reviews (Min-Length: 50 words), 1000 Reviews (Min-Length: 50 words, Stars: 1), 1000 Reviews (Min-Length: 50 words, Stars: 5")
         self.data_type = input("Would you like to generate a [n]ew data set or use an [e]xisting data set?: ").lower()
         while self.data_type not in ['n', 'e',]:
             print("\tPlease type [n, e].")
@@ -90,9 +89,9 @@ class Imitare:
             print()
             self.tagged_data = os.path.join(os.path.join(self.ROOT_PATH, "data"), pg_data[data-1] + ".tags")
         elif self.data_set == 'Y':
-            yelp_data = ["yelp_1000r_50l"]
+            yelp_data = ["yelp_1000r_50l", "yelp_1000r_50l_1s", "yelp_1000r_50l_5s"]
             print("\tYelp Data:")
-            print("\t[1] 1000 Reviews of length 50")
+            print("\t[1] 1000 Reviews, Length 50\n\t[2] 1000 Reviews, Length 50, 1 Star\n\t[2] 1000 Reviews, Length 50, 5 Stars")
             data = int(input("\nPlease enter the number of the review set you would like to use: "))
             print()
             self.tagged_data = os.path.join(os.path.join(self.ROOT_PATH, "data"), yelp_data[data-1] + ".tags")

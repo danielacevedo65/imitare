@@ -41,6 +41,8 @@ class Yelp_Data:
     def fetch_reviews(self):
         """Fetches JSON review with all info"""
         data_file = ur.urlopen(self.YELP_FILE_LINK)
+        if self.criteria_key == 'stars':
+            self.criteria_value = int(self.criteria_value)
         #with open(self.YELP_FILE) as data_file:                # USED LOCALLY
             #while len(self.reviews) < self.n_reviews:          # search through all reviews to get right number (may error out)
         for i in range(self.n_reviews):                         # go through set number of reviews
@@ -99,10 +101,11 @@ class Yelp_Data:
 def get_Yelp_data():
     n_reviews = input("Number of reviews to retrieve (default is 1000): ") or 1000
     min_review_length = input("Minimum review length (default is 50): ") or 50
-    criteria_key = input("Search by criteria [business_id, user_id, stars, date] (default is None): ") or None
+    criteria_key = input("Search by criteria [business_id, user_id, stars] (default is None): ") or None
     if criteria_key != None:
         criteria_value = input("Set criteria value [stars=4]: ")
-    criteria_value = None
+    else:
+        criteria_value = None
     print("\tFetching Yelp data...")
     return Yelp_Data(int(n_reviews), int(min_review_length), criteria_key, criteria_value)
 
