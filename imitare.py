@@ -1,14 +1,20 @@
 """
-IMITARE MAIN PROGRAM
+Imitare - A Versatile Text Generator
+-------
+Main Program
 
+CS175 Winter 2016
+    Daniel Acevedo, 20406712, daceved1@uci.edu
+    Priyank Patel, 40093954, pnpatel2@uci.edu
+    Stephanie Chang, 33865312, changsm1@uci.edu
 """
 
 import csv
 import os
-import traceback
 from stanford import StanfordTagger, StanfordDetokenizer
 from generator import LVGNgramGenerator
 from generate_yelp_data import get_Yelp_data
+from Twitter_data import TwitterData
 
 class Imitare:
     def __init__(self):
@@ -35,9 +41,9 @@ class Imitare:
 
     def get_ngram(self):
         self.n_gram = int(input("\nWhat n-gram length would you like to use? "))
-        print("You have chosen to use n_grams of length " + str(self.n_gram) + ".")
+        print("\tYou have chosen to use n_grams of length " + str(self.n_gram) + ".")
         if self.n_gram > 10:
-            print("Please note that the larger the n_gram length, the longer it will take to analyze the data.")
+            print("\tPlease note that the larger the n_gram length, the longer it will take to analyze the data.")
 
     def show_intro(self):
         print()
@@ -103,34 +109,42 @@ class Imitare:
             print("\tPlease type [C, T, Y].")
             self.data_set = input("Please choose a data set: ").upper()
         self.fetch_data()
+        save_data = input("\nWould you like to save a tagged version of this data {y: yes, n: no}?: ").lower()
+        while not save_data in ['y', 'n']:
+            print("Please enter [y] for yes or [n] for no.")
+            save_data = input("\nWould you like to save a tagged version of this data {y: yes, n: no}?: ").lower()
+        if save_data == 'y':
+            self.save_tagged_data = True
 
     def fetch_data(self):
-        try:
-            if self.data_set == 'C':
-                print("\tYou have chosen to work with custom data.")
-                print()
-                self.get_custom_data()
-            elif self.data_set == 'T':
-                print("\tYou have chosen to work with Twitter data.")
-                print()
-                self.get_twitter_data()
-            elif self.data_set == 'Y':
-                print("\tYou have chosen to work with Yelp data.")
-                print()
-                self.get_yelp_data()
-            else:
-                print("\tData set is not valid.")
-                self.get_data_set()
-        except:
-            print("There was an error while fetching data.")
-            traceback.print_exc()
+        if self.data_set == 'C':
+            print("\tYou have chosen to work with custom data.")
+            print()
+            self.get_custom_data()
+        elif self.data_set == 'T':
+            print("\tYou have chosen to work with Twitter data.")
+            print()
+            self.get_twitter_data()
+        elif self.data_set == 'Y':
+            print("\tYou have chosen to work with Yelp data.")
+            print()
+            self.get_yelp_data()
+        else:
+            print("\tData set is not valid.")
+            self.get_data_set()
 
     def get_custom_data(self):
-        print("The format of your text must be the following...")
-        pass
+        print("Please place a .txt file containing your data in the following directory: " + str(self.WORK_PATH))
+        data_path = input("What is the name of your text file?: ")
+        while not os.path.exists(os.path.join(self.WORK_PATH, data_path)):
+            print("\tCould not locate file.")
+            data_path = input("What is the name of your text file?: ")
+        self.data = os.path.join(self.WORK_PATH, data_path)
 
     def get_twitter_data(self):
-        pass
+        os.chdir(self.WORK_PATH) # change to data save directory
+        self.data = TwitterData().execute()
+        os.chdir(self.ROOT_PATH) # change back to main path
 
     def get_yelp_data(self):
         data = get_Yelp_data()
@@ -175,10 +189,12 @@ def main():
     else:
         imitare.get_existing_data()
     imitare.get_ngram()
-    print("Setup complete.")
-    print("\t ! Please note that if you are using a new data set, the tagging process may take some time.\n")
+    print("\nSetup complete. Please note the following:")
+    print("\t- If you are using a new data set, the tagging process may take some time.")
+    print("\t- If you want to use another data set, you must re-run the program.\n")
     print("Let's start generating text!\n")
     imitare.generate()
+    print("\nExiting Imitare...Goodbye!")
 
 if __name__ == '__main__':
     main()
