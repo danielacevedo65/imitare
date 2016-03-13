@@ -103,11 +103,13 @@ def get_Yelp_data():
     if criteria_key != None:
         criteria_value = input("Set criteria value [stars=4]: ")
     criteria_value = None
+    print("\tFetching Yelp data...")
     return Yelp_Data(int(n_reviews), int(min_review_length), criteria_key, criteria_value)
 
 if __name__ == '__main__':
     yelp_data = get_Yelp_data()
     print("\nGenerating Yelp data file...")
+    yelp_data.print_review_text()
     yelp_data.write_review_text()
     print("Average review length: " + str(yelp_data.avg_review_length()))
     #yelp_data.review_length_histogram()
