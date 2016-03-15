@@ -1,9 +1,16 @@
+"""
+Interface to using the Stanford NLP libraries
+"""
+
 from nltk.internals import java, config_java, find_jars_within_path
 import re
 import subprocess
 import tempfile
 
 class StanfordTagger:
+    """
+    Interface to Stanford POS tagger
+    """
 
     def __init__(self, model='stanford/models/english-bidirectional-distsim.tagger', libpath='stanford/', verbose=False):
         self._model = model
@@ -41,6 +48,9 @@ class StanfordTagger:
         return tagged
 
 class StanfordDetokenizer:
+    """
+    Interface to StanfordTokenizer doing heuristic detokenizing
+    """
 
     def __init__(self, libpath='stanford/', verbose=False):
         self._verbose = verbose

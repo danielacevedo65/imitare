@@ -1,9 +1,14 @@
+"""
+Implements various attempts to conserve memory using a better ConditionalFreqDist class.
+Python dicts unfortunately have huge byte cost even when nearly empty.
+"""
+
 from nltk.probability import ConditionalFreqDist, FreqDist
 
 import sqlite3
 import pickle
 
-
+# Functions for memory usage aware persisting to Sqlite3 database
 def _write_var_uint(uint):
     bytes = bytearray()
     while uint > 127:
@@ -70,15 +75,19 @@ sqlite3.register_converter("tuple", _compact_inttuple_read)
 sqlite3.register_adapter(FreqDist, _compact_FreqDist_write)
 sqlite3.register_converter("FreqDist", _compact_intdict_read)
 
-##def _sqlite_register_pickle(typecls, typename):
-##    sqlite3.register_adapter(typecls, pickle.dumps)
-##    sqlite3.register_converter(typename, pickle.loads)
-##
-##_sqlite_register_pickle(tuple, 'tuple')
-##_sqlite_register_pickle(dict, 'dict')
+#def _sqlite_register_pickle(typecls, typename):
+#    sqlite3.register_adapter(typecls, pickle.dumps)
+#    sqlite3.register_converter(typename, pickle.loads)
+#
+#_sqlite_register_pickle(tuple, 'tuple')
+#_sqlite_register_pickle(dict, 'dict')
 
 
 class SqliteConditionalFreqDist:
+    """
+    Mimicks a ConditionalFreqDist from ntlk using a Sqlite3 backend.
+    Note: assumes only int types, specifically tuple(int) mapping to FreqDist(int)
+    """
 
     def __init__(self, cond_samples=[], database=':memory:'):
         self._journal = ConditionalFreqDist()
@@ -135,6 +144,9 @@ class SqliteConditionalFreqDist:
 
 
 class PickleConditionalFreqDist:
+    """
+    Mimicks a ConditionalFreqDist from ntlk using Picklefied dicts to save memory.
+    """
 
     def __init__(self, cond_samples=[]):
         self._journal = ConditionalFreqDist()
