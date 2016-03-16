@@ -4,9 +4,10 @@ import random
 import csv
 
 def twitter(file: str, n: int, words: int, method: str):
-    '''raw_file -> name of file
+    ''' Returns the list of generated tweets
+       file -> name of file
        n -> number of n-grams
-       words -> how many to generate
+       words -> how many tweets to generate
        method -> method used to generate
     '''
     file = open(file, 'r')
@@ -33,7 +34,13 @@ def twitter(file: str, n: int, words: int, method: str):
             final.append(i)
     return final
     
-def yelp_or_gutenberg(file: str, n: int, words: int, method: str):        
+def yelp_or_gutenberg(file: str, n: int, words: int, method: str):
+    ''' Returns the list of generated sentences
+       file -> name of file
+       n -> number of n-grams
+       words -> how many sentences to generate
+       method -> method used to generate
+    '''
     file = open(file, 'r')
     tag = csv.reader(file)
     tagged = []
