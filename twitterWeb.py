@@ -38,6 +38,7 @@ class TwitterData:
         return self.twitterAuth.lookup_user(screen_name=self.user)[0]
         
     def getFields(self) -> list:
+        """ Returns the fields to add to the info dictionary """
         return "name screen_name id followers_count friends_count description location".split()
     
     def getInfo(self, userTweets: "file") -> None:
