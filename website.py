@@ -7,10 +7,15 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
+    """ Open the main website page """
     return render_template("index.html")
     
 @app.route('/twitter')
 def generateTwitter():
+    """ 
+        Grab information from the website UI, run it through the algorithm,
+        and return a dictionary containing the generated tweets.
+    """
     response = ""
     username = request.args.get("username")
     amount = request.args.get("amount")
@@ -25,6 +30,10 @@ def generateTwitter():
     
 @app.route('/yelp')
 def generateYelp():
+    """
+        Grab information from the website UI, run it through the algorithm,
+        and return a dictionary containing the generated Yelp reviews.
+    """
     response = ""
     amount = request.args.get("amount")
     which = request.args.get("which")
@@ -37,6 +46,10 @@ def generateYelp():
     
 @app.route('/gutenberg')
 def generateGutenberg():
+    """
+        Grab information from the website UI, run it through the algorithm,
+        and return a dictionary containing the generated sentences.
+    """
     response = ""
     amount = request.args.get("amount")
     which = request.args.get("which")
@@ -50,9 +63,11 @@ def generateGutenberg():
 
 @app.context_processor
 def override_url_for():
+    """ Used to fix web cache issues wheh modifying JS and CSS while testing website """
     return dict(url_for=dated_url_for)
 
 def dated_url_for(endpoint, **values):
+    """ Used to fix web cache issues when modifying JS and CSS while testing website """
     if endpoint == 'static':
         filename = values.get('filename', None)
         if filename:
