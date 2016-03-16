@@ -3,6 +3,9 @@ import random
 import nltk
 
 class Trigram:
+    """ A very rough Trigram text generator, used only to test the initial small Twitter set.
+        Not used in any way for our main program.
+    """
     
     def __init__(self, file):
         self.database = {}
@@ -12,12 +15,15 @@ class Trigram:
         self.data()
     
     def convert(self):
+        """ Return the file as a string """
         return self.file.read()
         
     def getTrigramInfo(self):
+        """ Obtain Trigram information from NLTK library """
         return nltk.ngrams(nltk.word_tokenize(self.contents), 3)
         
     def data(self):
+        """ Assign data into a dictionary """
         for i, j, h in self.trigram:
             key = (i, j)
             if key in self.database:
@@ -26,6 +32,7 @@ class Trigram:
                 self.database[key] = [h]
     
     def generationLength(self):
+        """ Obtain desired length of the tweet """
         n = int(input("Please enter length of generated tweet: "))
         if type(n) == int:
             return n
@@ -34,6 +41,7 @@ class Trigram:
             return self.generationLength()
     
     def generate(self):
+        """ Generate tweets """
         n = self.generationLength()
         contents = self.contents.split()
         startPoint = random.randint(0, len(contents)-3)
