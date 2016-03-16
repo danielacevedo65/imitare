@@ -1,26 +1,35 @@
-# Generates a .txt file containing Yelp review text.
-
 """
-Yelp Data Format
+generate_yelp_data.py
+---------------------
+Generates a .txt file containing Yelp review text.
 
-Review
-{
-    'type': 'review',
-    'business_id': (encrypted business id),
-    'user_id': (encrypted user id),
-    'stars': (star rating, rounded to half-stars),
-    'text': (review text),
-    'date': (date, formatted like '2012-03-14'),
-    'votes': {(vote type): (count)},
-}
+CS175 Winter 2016
+    Daniel Acevedo, 20406712, daceved1@uci.edu
+    Priyank Patel, 40093954, pnpatel2@uci.edu
+    Stephanie Chang, 33865312, changsm1@uci.edu
 
-Relevant keys: business_id, user_id, stars, text, date
+Notes:
+-----
+    Yelp Data Format
+
+    Review
+    {
+        'type': 'review',
+        'business_id': (encrypted business id),
+        'user_id': (encrypted user id),
+        'stars': (star rating, rounded to half-stars),
+        'text': (review text),
+        'date': (date, formatted like '2012-03-14'),
+        'votes': {(vote type): (count)},
+    }
+
+    Relevant keys: business_id, user_id, stars, text, date
 """
 
 import json
-import urllib.request as ur
 import matplotlib.pyplot as plt
 from nltk import FreqDist
+import urllib.request as ur
 
 class Yelp_Data:
 
@@ -39,7 +48,13 @@ class Yelp_Data:
         self.fetch_review_text()
 
     def fetch_reviews(self):
-        """Fetches JSON review with all info"""
+        """
+        Fetches all relevant Yelp reviews from the .JSON file
+
+        Returns
+        -------
+        Nothing
+        """
         data_file = ur.urlopen(self.YELP_FILE_LINK)
         if self.criteria_key == 'stars':
             self.criteria_value = int(self.criteria_value)
@@ -54,7 +69,9 @@ class Yelp_Data:
             self.reviews.append(review_json)
 
     def fetch_review_text(self):
-        """Retrieves text of review"""
+        """
+        Retrieve the text of all the reviews
+        """
         for review in self.reviews:
             review_length = len(review["text"])
             if review_length > self.min_review_length:
@@ -63,23 +80,23 @@ class Yelp_Data:
         return self.review_texts
 
     def write_review_text(self, filepath="yelp_data.txt"):
+        """
+        Write the review texts to a .txt file
+        """
         with open(filepath, 'w') as f:
             for review in self.review_texts:
                 f.write(review)
 
-    def print_reviews(self):
-        for review in self.reviews:
-            print(review)
-
-    def print_review_text(self):
-        review_texts = self.fetch_review_text()
-        for review in review_texts:
-            print(review)
-
     def avg_review_length(self):
+        """
+        Calculate the average length of a review
+        """
         return (sum(self.review_lengths) / len(self.review_lengths))
 
     def review_length_histogram(self):
+        """
+        Create a histogram of review lengths
+        """
         fdist = FreqDist(len(r) for r in self.review_texts)        # get review length data for histogram
         max_review_length = max(fdist.keys())
 
@@ -98,7 +115,25 @@ class Yelp_Data:
         axes.bar(review_lengths, number_of_reviews)
         fig.savefig("Yelp Data Histogram")
 
+    def print_reviews(self):
+        """
+        Print all the fetched reviews
+        """
+        for review in self.reviews:
+            print(review)
+
+    def print_review_text(self):
+        """
+        Print the text only of all fetched reviews
+        """
+        review_texts = self.fetch_review_text()
+        for review in review_texts:
+            print(review)
+
 def get_Yelp_data():
+    """
+    Instantiate and return a Yelp_Data object containing all relevant reviews
+    """
     n_reviews = input("Number of reviews to retrieve (default is 1000): ") or 1000
     min_review_length = input("Minimum review length (default is 50): ") or 50
     criteria_key = input("Search by criteria [business_id, user_id, stars] (default is None): ") or None

@@ -1,6 +1,6 @@
 """
 Imitare - A Versatile Text Generator
--------
+------------------------------------
 Main Program
 
 CS175 Winter 2016
@@ -28,6 +28,9 @@ class Imitare:
         self.save_tagged_data = False
 
     def get_working_directory(self):
+        """
+        Asks the user to indicate which folder should store all generated files
+        """
         path  = input("Please enter a name for a working directory for generated files: ")
         if not os.path.exists(path):
             print("\tMaking working directory...")
@@ -37,15 +40,24 @@ class Imitare:
         self.WORK_PATH = os.path.join(self.ROOT_PATH, path)
 
     def set_data_set(self, data_set):
+        """
+        Set the current data set for the generator
+        """
         self.data_set = data_set
 
     def get_ngram(self):
+        """
+        Get the size of the n-gram used for text generation from the user
+        """
         self.n_gram = int(input("\nWhat n-gram length would you like to use? "))
         print("\tYou have chosen to use n_grams of length " + str(self.n_gram) + ".")
         if self.n_gram > 10:
             print("\tPlease note that the larger the n_gram length, the longer it will take to analyze the data.")
 
     def show_intro(self):
+        """
+        Print a program introduction for the user
+        """
         print()
         print("Welcome to Imitare - a versatile text generator!")
         print("------------------------------------------------")
@@ -54,18 +66,24 @@ class Imitare:
         print()
 
     def get_data_type(self):
+        """
+        Get the data type that the user would like to use (new or existing/tagged)
+        """
         print("\nData Set Types:")
         print("\tNew Data Set: Generate and tag a new data set.")
         print("\tExisting Data Set: Use a tagged file to generate text (faster).")
         print("\t\t- Twitter: Barack Obama, Bernie Sanders, CNN, Donald Trump, Jimmy Fallon, Kanye West, NASA")
         print("\t\t- Project Gutenberg: Harry Potter Books")
         print("\t\t- Yelp: 1000 Reviews (Min-Length: 50 words), 1000 Reviews (Min-Length: 50 words, Stars: 1), 1000 Reviews (Min-Length: 50 words, Stars: 5")
-        self.data_type = input("Would you like to generate a [n]ew data set or use an [e]xisting data set?: ").lower()
+        self.data_type = input("\nWould you like to generate a [n]ew data set or use an [e]xisting data set?: ").lower()
         while self.data_type not in ['n', 'e',]:
             print("\tPlease type [n, e].")
-            self.data_type = input("Would you like to generate a [n]ew data set or use an [e]xisting data set?: ").lower()
+            self.data_type = input("\nWould you like to generate a [n]ew data set or use an [e]xisting data set?: ").lower()
 
     def get_existing_data(self):
+        """
+        Retrieves existing/tagged data as the dataset
+        """
         print("\nExisting Data Sets")
         print("\t- [T]witter: Barack Obama, Bernie Sanders, CNN, Donald Trump, Jimmy Fallon, Kanye West, NASA")
         print("\t- [P]roject Gutenberg: Harry Potter Books")
@@ -75,7 +93,7 @@ class Imitare:
             print("\tPlease type [T, P, Y].")
             self.data_set = input("Please choose a data set: ").upper()
         if self.data_set == 'T':
-            twitter_accounts = ["barackobama", "berniesanders", "cnn", "donaldtrump", "jimmyyfallon", "kanyewest", "nasa"]
+            twitter_accounts = ["barackobama", "berniesanders", "cnn", "donaldtrump", "jimmyfallon", "kanyewest", "nasa"]
             print("\nTwitter Data:")
             print("\t[1] Barack Obama\n\t[2] Bernie Sanders\n\t[3] CNN\n\t[4] Donald Trump\n\t[5] Jimmy Fallon\n\t[6] Kanye West\n\t[7] NASA")
             data = int(input("\nPlease enter the number of the account you would like to use: "))
@@ -99,6 +117,9 @@ class Imitare:
             print("Error in choosing existing data set.")
 
     def get_data_set(self):
+        """
+        Retrieves and generates new data sets
+        """
         print("\nData Sets")
         print("\t[C]ustom")
         print("\t[T]witter")
@@ -116,6 +137,9 @@ class Imitare:
             self.save_tagged_data = True
 
     def fetch_data(self):
+        """
+        Fetch the relevant dataset
+        """
         if self.data_set == 'C':
             print("\tYou have chosen to work with custom data.")
             print()
@@ -133,6 +157,9 @@ class Imitare:
             self.get_data_set()
 
     def get_custom_data(self):
+        """
+        Prompts the user for custom data set
+        """
         print("Please place a .txt file containing your data in the following directory: " + str(self.WORK_PATH))
         data_path = input("What is the name of your text file?: ")
         while not os.path.exists(os.path.join(self.WORK_PATH, data_path)):
@@ -141,11 +168,17 @@ class Imitare:
         self.data = os.path.join(self.WORK_PATH, data_path)
 
     def get_twitter_data(self):
+        """
+        Retrieves Twitter data
+        """
         os.chdir(self.WORK_PATH) # change to data save directory
         self.data = TwitterData().execute()
         os.chdir(self.ROOT_PATH) # change back to main path
 
     def get_yelp_data(self):
+        """
+        Retrieves Yelp data
+        """
         data = get_Yelp_data()
         print("\tGenerating Yelp data file (yelp_data.txt)...")
         self.data = os.path.join(self.WORK_PATH, "yelp_data.txt")
@@ -153,6 +186,9 @@ class Imitare:
         print("\tYelp data file created.")
 
     def generate(self):
+        """
+        Generates text using provided source text data
+        """
         if self.data is not None:
             with open(self.data, 'r') as data_file:
                 text = data_file.read()
@@ -179,6 +215,9 @@ class Imitare:
                 break
 
 def main():
+    """
+    Main Imitare program
+    """
     imitare = Imitare()
     imitare.show_intro()
     imitare.get_working_directory()
