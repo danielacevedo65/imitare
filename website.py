@@ -1,3 +1,14 @@
+### TO DOWNLOAD FLASK, OPEN A COMMAND SHELL AND TYPE: pip install Flask ###
+### TO DOWNLOAD TWYTHON, OPEN A COMMMAND SHELL AND TYPE: pip install Flask ###
+
+### IMPORTANT INFORMATION TO RUN WEBSITE ###
+### 1. OPEN A COMMAND SHELL ###
+### 2. cd INTO THE imitare-master DIRECTORY ###
+### 3. TYPE: python website.py ###
+### 4. OPEN THE INTERNET BROWSER OF YOUR CHOICE ###
+### 5. TYPE THIS INTO YOUR ADDRESS BAR: 127.0.0.1:5000 ###
+### THE WEBSITE IS READY FOR USE! ###
+
 from flask import Flask, render_template, url_for, request, jsonify
 import os
 import twitterWeb
