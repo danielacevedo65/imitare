@@ -3,8 +3,10 @@ from twython import Twython
 import os
   
 class TwitterData:
+    """ Retrieves data to be used for the Web User Interface """
     
     def __init__(self, user=None):
+        """ Initializes information to grab Twitter authorization and information """
         self.app_key = "0jQVXOQwtgWwpMQDKW4j2RATp"
         self.app_secret = "ULkoBdUbd5v66AiTyJV854pTtC3y41plzERvAql6ePkiTwK2KM"
         self.oauth_token = "4890112186-uQdAncc22l4hcUVVOzk9B6tNAt2t2GyVMleJYju"
@@ -23,19 +25,23 @@ class TwitterData:
         self.fields = self.getFields()
 
     def getTwitterAuth(self) -> "twitter info":
+        """ Returns the Twitter Authorization"""
         return Twython(app_key=self.app_key, app_secret=self.app_secret, oauth_token=self.oauth_token, oauth_token_secret=self.oauth_token_secret)
        
     def getUser(self) -> str:
+        """ Return the username to use """
         user = str(input("Which User would you like to use? "))
         return user
         
     def getUserID(self) -> dict:
+        """ Grabs the user ID of the entered username """
         return self.twitterAuth.lookup_user(screen_name=self.user)[0]
         
     def getFields(self) -> list:
         return "name screen_name id followers_count friends_count description location".split()
     
     def getInfo(self, userTweets: "file") -> None:
+        """ Grabs the necessary information to obtain a user's tweets """
         info = {}
         for f in self.fields:
             info[f] = ""
@@ -67,6 +73,7 @@ class TwitterData:
                     maxTweet = i['id']
     
     def execute(self):
+        """ Returns the path to a file containing, at most, the most recent 4000 tweets from a user """
         user_tweets = "%s_tweets.txt" % (self.user)
     
         userTweets = open(user_tweets, "w")
